@@ -60,7 +60,8 @@ export function formatMinuteSecond(time) {
 }
 
 export function getPlayUrl(id) {
-  return `http://localhost:4000/song/url?id=${id}`.url
+  // return `http://localhost:4000/song/url?id=${id}`.url
+  return 'http://m8.music.126.net/20211030002813/19d003e5e673003d89e59198bd07e78a/ymusic/ts/free/914e62e7e9b8a4bd4d5f7a10515efb0f.mp3';
 }
 
 // 函数防抖: 解决refresh频繁刷新

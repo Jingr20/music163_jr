@@ -2,49 +2,70 @@ import {PlayerbarWrapper,PlayerInfo,Control,Operator} from './style';
 import {Slider,Tooltip} from 'antd';
 import {useDispatch,useSelector,shallowEqual} from 'react-redux';
 import {useEffect,useState,useRef} from 'react';
-import {getSongDetailAction} from '../store/actionCreator';
-import {getSizeImage, formatDate,getPlayUrl} from '@/utils/format-utils.js';
+import {getSongDetailAction,getSongPlayUrlAction} from '../store/actionCreator';
+import {getSizeImage, formatDate} from '@/utils/format-utils.js';
 
 function AppPlayerBar(){
-    console.log('组件渲染');
+    console.log('AppPlayerBar组件渲染');
 
     //发送网络请求，请求歌曲详情
     const dispatch = useDispatch();
     useEffect(()=>{
         console.log('请求歌曲详情');
-        dispatch(getSongDetailAction(167874));
-    },[dispatch]);
+        dispatch(getSongDetailAction(167872));
+    },[]); // eslint-disable-line react-hooks/exhaustive-deps
+
 
     // 获取store中的数据
-    const {currentSong} = useSelector((state)=>({
-        currentSong:state.player.currentSong
+    const {currentSong,currentSongPlayUrl} = useSelector((state)=>({
+        currentSong: state.player.currentSong,
+        currentSongPlayUrl: state.player.currentSongPlayUrl
     }),shallowEqual); 
 
-    // other handle
+    // 组件内state
+    const [isPlaying,setIsPlaying] = useState(false); // 是否正在播放
+    const [currentTime,setCurrentTime] = useState(0);  // 当前播放的时间
+    const [progress,setProgress] = useState(0);  // 滑动条进度
+
+
+    // 判断当前是否拿到currentSong的数据（第一次渲染还未拿到异步数据）
     const picUrl = currentSong.al && currentSong.al.picUrl; // 图片url
     const songName = currentSong.name; // 歌曲名字
     const singerName = currentSong.ar && currentSong.ar[0].name; //作者名字
     const duration = currentSong.dt; //播放总时间
-
-    // 组件内state
-    const [isPlaying,setIsPlaying] = useState(false); // 是否正在播放
-
+    const songPlayUrl = currentSongPlayUrl.url; //音乐播放URL
+    
+    // 利用ref获取DOM元素
     const audioRef = useRef();
+
+
+    /***** 设置音频src ****/
+    useEffect(()=>{
+        console.log('设置音频******');
+        if(currentSong.id){
+            dispatch(getSongPlayUrlAction(currentSong.id));
+        }
+    },[currentSong]);// eslint-disable-line react-hooks/exhaustive-deps
+
 
     /***** 点击播放/暂停音乐 ****/
     function playMusic(){
         // 更改状态
         setIsPlaying(!isPlaying);
-        // isPlaying ? audioRef.current.pause() : audioRef.current.play();
+        isPlaying ? audioRef.current.pause() : audioRef.current.play();
     }
 
-    /***** 设置音频的src ****/
-    // useEffect(()=>{
-    //     audioRef.current.src = getPlayUrl(currentSong.id);
-    //     // 设置音量
-    //     audioRef.current.volume = 0.3;
-    // },[])
+    /***** 更新歌曲播放时间 ****/
+    function timeUpdate(e){
+        // console.log(e.target.currentTime);
+        let currentTime = e.target.currentTime;
+        setCurrentTime(currentTime*1000);
+        setProgress(((currentTime * 1000) / duration) * 100);
 
+    }
+   
+
+    
     return (
         <PlayerbarWrapper className='sprite_player'>
             <div className='content'>
@@ -62,9 +83,11 @@ function AppPlayerBar(){
                             <a className='song-name' href='#/discover/song'>{songName}</a>
                             <a className='song-author' href='#/author'>{singerName}</a>
                         </div>
-                        <Slider/>
+                        <Slider
+                            value={progress}
+                        />
                         <div className='song-time'>
-                            <span className='now-time'>XXX</span>
+                            <span className='now-time'>{formatDate(currentTime, 'mm:ss')}</span>
                             <span className='total-time'>
                                 {' '}
                                 / {duration && formatDate(duration, 'mm:ss')}
@@ -94,11 +117,12 @@ function AppPlayerBar(){
                     </div>
                 </Operator>
             </div>
-            {/* <audio
+            <audio
                 id="audio"
                 ref={audioRef}
-                preload="auto"
-            /> */}
+                src={songPlayUrl}
+                onTimeUpdate={timeUpdate}
+            />
         </PlayerbarWrapper>
     );
 }
