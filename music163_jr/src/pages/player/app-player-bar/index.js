@@ -12,7 +12,7 @@ function AppPlayerBar(){
     const dispatch = useDispatch();
     useEffect(()=>{
         console.log('请求歌曲详情');
-        dispatch(getSongDetailAction(167872));
+        dispatch(getSongDetailAction(167876));
     },[]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
@@ -26,6 +26,7 @@ function AppPlayerBar(){
     const [isPlaying,setIsPlaying] = useState(false); // 是否正在播放
     const [currentTime,setCurrentTime] = useState(0);  // 当前播放的时间
     const [progress,setProgress] = useState(0);  // 滑动条进度
+    const [isChanging, setIsChanging] = useState(false); // 是否正在滑动
 
 
     // 判断当前是否拿到currentSong的数据（第一次渲染还未拿到异步数据）
@@ -55,15 +56,33 @@ function AppPlayerBar(){
         isPlaying ? audioRef.current.pause() : audioRef.current.play();
     }
 
-    /***** 更新歌曲播放时间 ****/
+    /***** 音乐播放时更新歌曲播放时间currentTime、slider进程 ****/
     function timeUpdate(e){
         // console.log(e.target.currentTime);
         let currentTime = e.target.currentTime;
-        setCurrentTime(currentTime*1000);
-        setProgress(((currentTime * 1000) / duration) * 100);
+        if(!isChanging){
+            console.log('音乐播放时更新歌曲播放时间currentTime、slider进程');
+            setCurrentTime(currentTime*1000);
+            setProgress(((currentTime * 1000) / duration) * 100);   
+        }     
+    }
+
+    /***** 滑动滑块时触发 ****/
+    function sliderChange(value){
+        console.log('滑动滑块时更新currentTime、slider进程');
+        setIsChanging(true);
+        const currentTime = (value / 100) * duration;
+        setCurrentTime(currentTime);
+        setProgress(value);
 
     }
-   
+    /***** 手指抬起时触发 ****/
+    function slideAfterChange(value){
+        console.log('手指抬起时更新audio的currentTime');
+        setIsChanging(false);
+        const currentTime = ((value / 100) * duration) / 1000;
+        audioRef.current.currentTime = currentTime;
+    }
 
     
     return (
@@ -85,6 +104,8 @@ function AppPlayerBar(){
                         </div>
                         <Slider
                             value={progress}
+                            onChange={sliderChange}
+                            onAfterChange={slideAfterChange}
                         />
                         <div className='song-time'>
                             <span className='now-time'>{formatDate(currentTime, 'mm:ss')}</span>
