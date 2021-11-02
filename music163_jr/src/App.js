@@ -8,6 +8,7 @@ import AppPlayerBar from '@/pages/player/app-player-bar';
 import {Provider} from 'react-redux';
 import store from './store';
 
+
 function App() {
   return (
     <Provider store={store}>
