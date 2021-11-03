@@ -19,3 +19,13 @@ export function getSongPlayUrl(id){
         }
     });
 }
+
+// 歌词请求
+export function getLyric(id){
+    return request({
+        url:'/lyric',
+        params:{
+            id
+        }
+    });
+}

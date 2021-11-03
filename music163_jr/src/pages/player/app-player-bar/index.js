@@ -1,11 +1,12 @@
 import {PlayerbarWrapper,PlayerInfo,Control,Operator} from './style';
-import {Slider,Tooltip} from 'antd';
+import {Slider,Tooltip, message} from 'antd';
 import {useDispatch,useSelector,shallowEqual} from 'react-redux';
 import {useEffect,useState,useRef} from 'react';
 import {getSongDetailAction,
         getSongPlayUrlAction,
         changePlaySequenceAction,
-        changeCurrentIndexAndSongAction} from '../store/actionCreator';
+        changeCurrentIndexAndSongAction,
+        changeCurrentLyricIndexAction} from '../store/actionCreator';
 import {getSizeImage, formatDate} from '@/utils/format-utils.js';
 
 function AppPlayerBar(){
@@ -16,12 +17,16 @@ function AppPlayerBar(){
         currentSong,
         currentSongPlayUrl,
         playSequence,
-        playListCount
+        playListCount,
+        lyricList,
+        currentLyricIndex
             } = useSelector((state)=>({
         currentSong: state.player.currentSong,
         currentSongPlayUrl: state.player.currentSongPlayUrl,
         playSequence:state.player.playSequence,
-        playListCount:state.player.playListCount
+        playListCount:state.player.playListCount,
+        lyricList:state.player.lyricList,
+        currentLyricIndex:state.player.currentLyricIndex
     }),shallowEqual); 
 
     // 组件内state
@@ -64,6 +69,7 @@ function AppPlayerBar(){
     // 切换歌曲时播放音乐
     useEffect(() => {
         isPlaying && audioRef.current.play();
+        !isPlaying && message.destroy('lyric');
     }, [isPlaying]);
 
 
@@ -81,7 +87,29 @@ function AppPlayerBar(){
             // console.log('音乐播放时更新歌曲播放时间currentTime、slider进程');
             setCurrentTime(currentTime*1000);
             setProgress(((currentTime * 1000) / duration) * 100);   
-        }     
+        }    
+
+        // 获取当前播放歌词
+        let i = 0; //用于获取歌词的索引
+        for (; i < lyricList.length; i++){
+            if (currentTime * 1000 < lyricList[i].totalTime) {
+                break;
+            }
+        }
+        // 如果index没有改变,就不进行dispatch(对dispatch进行优化)
+        if (currentLyricIndex !== i - 1) {
+            dispatch(changeCurrentLyricIndexAction(i - 1));
+        }
+        
+        // 展示歌词
+        const lyricContent = lyricList[i - 1] && lyricList[i - 1].content;
+        lyricContent && isPlaying &&
+        message.open({
+            key: 'lyric',
+            content: lyricContent,
+            duration: 0,
+            className: 'lyric-css',
+        });
     }
 
     /***** 当前歌曲播放结束后 ****/
@@ -158,6 +186,7 @@ function AppPlayerBar(){
                             value={progress}
                             onChange={sliderChange}
                             onAfterChange={slideAfterChange}
+                            tipFormatter={null}
                         />
                         <div className='song-time'>
                             <span className='now-time'>{formatDate(currentTime, 'mm:ss')}</span>

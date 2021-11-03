@@ -1,7 +1,9 @@
 import * as actionTypes from './actionTypes';
 import {getSongDetail,
-        getSongPlayUrl,} from '@/service/player';
+        getSongPlayUrl,
+        getLyric} from '@/service/player';
 import { getRandomNumber } from '@/utils/math-utils'
+import { parseLyric } from '@/utils/parse-lyric'
 
 // 歌曲详情Action
 const changeCurrentSongAction = res =>({
@@ -25,12 +27,14 @@ const changePlayListCount = res => ({
     playListCount:res
 })
 
+
 // 首次加载Action
 export const changeFirstLoad = res => ({
     type: actionTypes.CHANGE_FIRST_LOAD,
     firstLoad: res
 })
 
+// 获取歌曲详情
 export const getSongDetailAction = (id) =>{
     return (dispatch,getState) => {
         // 1、根据id查找palyList里是否有该歌曲
@@ -42,6 +46,7 @@ export const getSongDetailAction = (id) =>{
             dispatch(changeSongIndexAction(songIndex));
             dispatch(changeCurrentSongAction(playList[songIndex]));
             dispatch(changeCurrentSongPlayUrlAction(id));
+            dispatch(getLyricAction(id))
 
         }else{
             // 3、没找到歌曲
@@ -60,6 +65,8 @@ export const getSongDetailAction = (id) =>{
                 dispatch(changeCurrentSongPlayUrlAction(id));
                 // (5)更新歌曲数量
                 dispatch(changePlayListCount(playList.length));
+                // (6)请求歌曲的歌词
+                dispatch(getLyricAction(id))
             });
 
         }
@@ -120,8 +127,34 @@ export const changeCurrentIndexAndSongAction = (tag) =>{
         dispatch(changeCurrentSongAction(song));
         dispatch(changeSongIndexAction(currentSongIndex))
         dispatch(changeCurrentSongPlayUrlAction(song.id));
+        // 请求歌曲的歌词
+        dispatch(getLyricAction(song.id))
     }
 }
 
+// 改变歌词Action
+const changeLyricAction = (res) => ({
+    type: actionTypes.CHANGE_LYRIC_LIST,
+    lyricList:res
+})
+
+// 请求歌词
+export const getLyricAction = (id) => {
+    return async (dispatch) => {
+      await getLyric(id).then((res) => {
+        const lyric = res.lrc && res.lrc.lyric
+        const lyricList = parseLyric(lyric)
+    
+        dispatch(changeLyricAction(lyricList))
+      })
+    }
+  }
+
+
+// 改变currentLyricIndex
+export const changeCurrentLyricIndexAction = (res) => ({
+    type: actionTypes.CHANGE_CURRENT_LYRIC_INDEX,
+    currentLyricIndex:res
+})
 
 

@@ -354,7 +354,9 @@ const defaultState = {
     ],
     playSequence: 0, // 0循环播放  1随机播放  2单曲循环
     playListCount:0,
-    firstLoad: true
+    firstLoad: true,
+    lyricList: [],
+    currentLyricIndex: 0
 }
 
 function reducer(state=defaultState,action){
@@ -388,6 +390,16 @@ function reducer(state=defaultState,action){
             return {
                 ...state,
                 playListCount:action.playListCount
+            };
+        case actionTypes.CHANGE_LYRIC_LIST:
+            return {
+                ...state,
+                lyricList:action.lyricList
+            }
+        case actionTypes.CHANGE_CURRENT_LYRIC_INDEX:
+            return {
+                ...state,
+                currentLyricIndex:action.currentLyricIndex
             };
         default:
             return state;

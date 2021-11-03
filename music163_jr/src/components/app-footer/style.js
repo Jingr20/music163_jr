@@ -3,7 +3,8 @@ import styled from 'styled-components';
 export const FooterWrapper = styled.div`
     width: 100%;
     min-width: 980px;
-    height: 115px;
+    /* height: 115px; */
+    height: 155px;
     border-top: 1px solid #d3d3d3;
     background-color: #f2f2f2;
   
