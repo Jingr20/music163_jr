@@ -91,16 +91,88 @@ export const HeaderRight = styled.div`
     align-items:center;
     color: #ccc;
 
-    .search{
-        width: 221px;
-        height: 32px;
-        border-radius: 16px;
+    .search-wrapper {
+        position: relative;
 
-        input{
-            font-size: 14px;
-            font-family: '微软雅黑';
-            &::placeholder {
-                font-size: 12px;
+        // 搜索框
+        .search{
+            width: 221px;
+            height: 32px;
+            border-radius: 16px;
+
+            input{
+                font-size: 14px;
+                font-family: '微软雅黑';
+                &::placeholder {
+                    font-size: 12px;
+                }
+            }
+        }
+
+        // 下拉框
+        .down-slider {
+            position: absolute;
+            top: 36px;
+            left: 0;
+            right: 0;
+            width: 237px;
+            z-index: 999;
+            border: 1px solid #bebebe;
+            border-radius: 4px;
+            background: #fff;
+            box-shadow: 0 4px 7px #555;
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+
+            .search-header {
+                height: 35px;
+                .discover {
+                    display: inline-block;
+                    padding-top: 10px;
+                    padding-left: 10px;
+                }
+            }
+
+            .content {
+                display: flex;
+                width: 235px;
+                border: 1px solid rgb(183, 183, 187);
+
+                .zuo {
+                    width: 50px;
+                    padding-top: 10px;
+                    .song {
+                        color: #ccc;
+                        margin-left: 18px;
+                    }
+                }
+
+                .main {
+                    display: inline-block;
+                    font-size: 13px;
+
+                    .item {
+                        width: 178px;
+                        height: 35px;
+                        line-height: 35px;
+                        cursor: pointer;
+                        
+                        color: #000;
+                        text-indent: 8px;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                       
+                        &:hover {
+                            background-color: #ecf0f1;
+                            border-radius: 5%;
+                        }
+
+                        &.active {
+                            background-color: #ecf0f1;
+                            color: #2ecc71;
+                        }
+                    }
+                }
             }
         }
     }
