@@ -356,7 +356,8 @@ const defaultState = {
     playListCount:0,
     firstLoad: true,
     lyricList: [],
-    currentLyricIndex: 0
+    currentLyricIndex: 0,
+    isPlaying:false
 }
 
 function reducer(state=defaultState,action){
@@ -401,6 +402,11 @@ function reducer(state=defaultState,action){
                 ...state,
                 currentLyricIndex:action.currentLyricIndex
             };
+        case actionTypes.CHANGE_ISPLAYING:
+            return {
+                ...state,
+                isPlaying:action.isPlaying
+            }
         default:
             return state;
     }

@@ -157,4 +157,18 @@ export const changeCurrentLyricIndexAction = (res) => ({
     currentLyricIndex:res
 })
 
+// 修改播放列表并修改歌曲数量
+export const changePlaylistAndCount = (playlist) => {
+    return (dispatch) => {
+      dispatch(changePlayListAction(playlist))
+      dispatch(changePlayListCount(playlist.length))
+    }
+}
+
+// 改变歌曲播放状态
+export const changeIsPlayingAction = (res) => ({
+    type: actionTypes.CHANGE_ISPLAYING,
+    isPlaying:res
+})
+
 

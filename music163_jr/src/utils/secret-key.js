@@ -14,7 +14,9 @@ export async function setLoginInfo(key, info) {
       JSON.stringify(info),
       secretKey
     ).toString();
-    localStorage.setItem(key, cipherText); //本地存储
+    //对加密数据进行base64处理, 原理：就是先将字符串转换为utf8字符数组，再转换为base64数据
+    let encData = CryptoJS.enc.Base64.stringify(CryptoJS.enc.Utf8.parse(cipherText));
+    localStorage.setItem(key, encData); //本地存储
     return true;
   } else {
     message.error('网络异常, 请稍后重试');
@@ -30,7 +32,10 @@ export function getLoginInfo(key) {
   if (key.length) {
     /* 取出加密后的value */
     let tk = localStorage.getItem(key); //把存储的值取出
-    let bytes = CryptoJS.AES.decrypt(tk, secretKey);
+    //将数据先base64还原，再转为utf8数据
+    let decData = CryptoJS.enc.Base64.parse(tk).toString(CryptoJS.enc.Utf8);
+    //解密数据
+    let bytes = CryptoJS.AES.decrypt(decData, secretKey);
     let originalText = bytes.toString(CryptoJS.enc.Utf8); //解密操作
     return JSON.parse(originalText);
   }

@@ -6,8 +6,10 @@ import {getSongDetailAction,
         getSongPlayUrlAction,
         changePlaySequenceAction,
         changeCurrentIndexAndSongAction,
-        changeCurrentLyricIndexAction} from '../store/actionCreator';
+        changeCurrentLyricIndexAction,
+        changeIsPlayingAction} from '../store/actionCreator';
 import {getSizeImage, formatDate} from '@/utils/format-utils.js';
+import SliderPlaylist from './c-cpns/slider-playlist';
 
 function AppPlayerBar(){
     // console.log('AppPlayerBar组件渲染');
@@ -19,22 +21,24 @@ function AppPlayerBar(){
         playSequence,
         playListCount,
         lyricList,
-        currentLyricIndex
+        currentLyricIndex,
+        isPlaying
             } = useSelector((state)=>({
         currentSong: state.player.currentSong,
         currentSongPlayUrl: state.player.currentSongPlayUrl,
         playSequence:state.player.playSequence,
         playListCount:state.player.playListCount,
         lyricList:state.player.lyricList,
-        currentLyricIndex:state.player.currentLyricIndex
+        currentLyricIndex:state.player.currentLyricIndex,
+        isPlaying:state.player.isPlaying
     }),shallowEqual); 
 
     // 组件内state
-    const [isPlaying,setIsPlaying] = useState(false); // 是否正在播放
+    // const [isPlaying,setIsPlaying] = useState(false); // 是否正在播放
     const [currentTime,setCurrentTime] = useState(0);  // 当前播放的时间
     const [progress,setProgress] = useState(0);  // 滑动条进度
     const [isChanging, setIsChanging] = useState(false); // 是否正在滑动
-    // const [songId, setSongId] = useState(); // 是否正在滑动
+    const [isShowSlide, setIsShowSlide] = useState(false); // 是否显示播放列表
 
 
     //发送网络请求，请求歌曲详情
@@ -46,11 +50,11 @@ function AppPlayerBar(){
 
 
     // 判断当前是否拿到currentSong的数据（第一次渲染还未拿到异步数据）
-    const picUrl = currentSong.al && currentSong.al.picUrl; // 图片url
-    const songName = currentSong.name; // 歌曲名字
-    const singerName = currentSong.ar && currentSong.ar[0].name; //作者名字
-    const duration = currentSong.dt; //播放总时间
-    const songPlayUrl = currentSongPlayUrl && currentSongPlayUrl.url; //音乐播放URL
+    const picUrl = currentSong&&currentSong.al && currentSong.al.picUrl; // 图片url
+    const songName = currentSong&&currentSong.name; // 歌曲名字
+    const singerName = currentSong&&currentSong.ar && currentSong.ar[0].name; //作者名字
+    const duration = currentSong&&currentSong.dt; //播放总时间
+    const songPlayUrl = currentSong&&currentSongPlayUrl && currentSongPlayUrl.url; //音乐播放URL
     
     // 利用ref获取DOM元素
     const audioRef = useRef();
@@ -59,7 +63,7 @@ function AppPlayerBar(){
     /***** 设置音频src ****/
     useEffect(()=>{
         // console.log('设置音频******');
-        if(currentSong.id){
+        if(currentSong&&currentSong.id){
             dispatch(getSongPlayUrlAction(currentSong.id));
             // 设置音量
             audioRef.current.volume = 0.3;
@@ -68,15 +72,19 @@ function AppPlayerBar(){
 
     // 切换歌曲时播放音乐
     useEffect(() => {
-        isPlaying && audioRef.current.play();
-        !isPlaying && message.destroy('lyric');
-    }, [isPlaying]);
+        // 设置<audio>自动播放，当 播放状态isPlaying 和 歌曲播放源改变 时触发，判断控制播放
+        if(isPlaying) audioRef.current.play();
+        else {
+            audioRef.current.pause();
+            message.destroy('lyric');
+        }
+    }, [isPlaying,currentSongPlayUrl]);
 
 
     /***** 点击播放/暂停音乐 ****/
     function playMusic(){
         // 更改状态
-        setIsPlaying(!isPlaying);
+        dispatch(changeIsPlayingAction(!isPlaying))
         isPlaying ? audioRef.current.pause() : audioRef.current.play();
     }
 
@@ -110,6 +118,7 @@ function AppPlayerBar(){
             duration: 0,
             className: 'lyric-css',
         });
+        isShowSlide && message.destroy('lyric');
     }
 
     /***** 当前歌曲播放结束后 ****/
@@ -121,7 +130,7 @@ function AppPlayerBar(){
         }else{
             // 播放下一首
             dispatch(changeCurrentIndexAndSongAction(1));
-            setIsPlaying(false);
+            // setIsPlaying(false);
         }
     }
 
@@ -149,7 +158,6 @@ function AppPlayerBar(){
             return;
         }
         dispatch(changeCurrentIndexAndSongAction(tag));
-        setIsPlaying(false); // 更改播放状态图标
     }
 
      /***** 更改播放顺序 ****/
@@ -211,11 +219,20 @@ function AppPlayerBar(){
                         >
                             <button className='sprite_player btn loop' onClick={changeSequence}></button>
                         </Tooltip>
-                        <Tooltip title='播放列表'>
-                            <button className='sprite_player btn playlist'>
+                        <button className='sprite_player btn playlist' onClick={() => setIsShowSlide(!isShowSlide)}>
+                            <Tooltip title='播放列表'>
                                 <span>{playListCount}</span>
-                            </button>
-                        </Tooltip>
+                            </Tooltip>
+                            <SliderPlaylist
+                                isShowSlider={isShowSlide} 
+                                playlistCount={playListCount}
+                                closeWindow={()=>{setIsShowSlide(!isShowSlide)}}
+                                // playMusic={()=>{setIsPlaying(true + Math.random())}}
+                                // playMusic={()=>{setIsPlaying(false)}}
+                                changeSong={changeSong}
+                                isPlaying={isPlaying}
+                            />
+                        </button>
                     </div>
                 </Operator>
             </div>
@@ -225,6 +242,7 @@ function AppPlayerBar(){
                 src={songPlayUrl}
                 onTimeUpdate={timeUpdate}
                 onEnded={handleTimeEnd}
+                autoPlay={true}
             />
         </PlayerbarWrapper>
     );

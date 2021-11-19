@@ -198,5 +198,11 @@ export const HeaderRight = styled.div`
         cursor: pointer;
         text-decoration: underline;
     }
+
+    .profile-img {
+        width: 35px;
+        height: auto;
+        border-radius: 50%;
+    }
     
 `

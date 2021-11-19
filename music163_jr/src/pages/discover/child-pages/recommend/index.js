@@ -4,8 +4,6 @@ import HotRecommend from './c-cpns/hot-recommend';
 import NewAlbum from './c-cpns/new-album';
 import RecommendRanking from './c-cpns/recommend-ranking';
 
-
-
 function Recommend(props){
     console.log('Recommend组件渲染');
 

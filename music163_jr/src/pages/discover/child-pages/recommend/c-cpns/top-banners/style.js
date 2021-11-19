@@ -64,6 +64,9 @@ export const BannerControl = styled.div`
         }
 
     }
+    .slick-dots{
+        z-index: 0;
+    }
 `
 
 

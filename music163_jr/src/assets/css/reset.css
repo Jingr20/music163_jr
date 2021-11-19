@@ -216,3 +216,15 @@ main.content {
 .icon-small {
   background: url(../img/icon2.png) no-repeat 0 9999px;
 }
+
+.ant-modal-header {
+  background-color: #2d2d2d;
+  padding: 10px 24px;
+}
+
+.ant-modal-close-x{
+  width: 46px;
+  height: 46px;
+  line-height: 46px;
+  color: #ccc;
+}
