@@ -12,8 +12,9 @@
   - 滑块控制当前音乐播放时间（<audio>标签与滑块联动：currenttime控制滑动，拖动滑块改变currenttime）
   - 点击按钮/播放列表控制歌曲切换
   - 切换音乐列表播放顺序（循环/随机/顺序）
+  - 当前播放音乐的歌词解析（对拿到的歌词字符串按`\n`分割，对每行用正则表达式提取时间点和相应歌词加入歌词列表）
   - 展开播放列表后歌词实时滚动（根据当前歌词索引触发scrollTo，使高亮保持在第四行）
-  - 播放列表收起时，若歌曲播放，用组件`message`实时显示歌词（组件`message`和播放列表互斥）
+  - 播放列表收起时，若歌曲播放，用组件`message`实时显示歌词（currenttime定位歌词索引，组件`message`和播放列表互斥）
 
 <img src='./images/rd01.png'>
 
@@ -69,4 +70,8 @@
 - 使用组件库`antd`（message/Input/Dropdown/Menu/Carousel...）
 - 使用`react-redux`（store存储全局共享状态）和`redux-thunk`中间件（完成异步操作，发送请求加载数据）
 - 使用`propType`校验`props`类型及默认值
+
+
+
+### 4、项目的优化
 
